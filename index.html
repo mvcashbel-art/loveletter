@@ -170,6 +170,32 @@
         }
         .letter-text p { font-size: 1.05rem; line-height: 1.7; margin-bottom: 1.2rem; }
 
+        /* Reply Button Styling */
+        .reply-button-container {
+            text-align: center;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .reply-btn {
+            display: inline-block;
+            background-color: var(--dark-pink);
+            color: white;
+            text-decoration: none;
+            padding: 0.6rem 1.5rem;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 1rem;
+            box-shadow: 0 4px 10px rgba(236, 112, 99, 0.3);
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+        }
+
+        .reply-btn:hover {
+            background-color: #d9534f;
+            transform: scale(1.05);
+            box-shadow: 0 6px 15px rgba(236, 112, 99, 0.4);
+        }
+
         /* Photo Gallery Section */
         .gallery-section {
             width: 100%;
@@ -282,10 +308,15 @@
         <div class="letter-content" onclick="event.stopPropagation()">
             <div class="letter-scroll-wrapper">
                 <div class="letter-text">
-                    <h2 contenteditable="true">Hey My Baby LoveLove,</h2>
-                    <p contenteditable="true">I put together a small gallery of some of my absolute favorite moments with you. Looking back at these makes me realize how incredibly lucky I am to have you by my side. I pray that we can have more moments to be together.</p>
-                    <p contenteditable="true">From our casual video call catch-ups to the funny photobooth frames, every single memory puts a massive smile on my face. Well we have more video calls and screenshots hahahahaha!!!. You can edit any part of this letter text right here if you want to leave a custom note!</p>
-                    <p style="text-align: right; font-style: italic; font-weight: bold; margin-top: 2rem;" contenteditable="true">Yours always, <br> Daniel</p>
+                    <h2>Hey My Baby LoveLove,</h2>
+                    <p>I put together a small gallery of some of my absolute favorite moments with you. Looking back at these makes me realize how incredibly lucky I am to have you by my side. I pray that we can have more moments to be together.</p>
+                    <p>From our casual video call catch-ups to the funny photobooth frames, every single memory puts a massive smile on my face. Well we have more video calls and screenshots hahahahaha!!! I can't wait to make so many more memories with you.</p>
+                    <p style="text-align: right; font-style: italic; font-weight: bold; margin-top: 2rem;">Yours always, <br> Daniel</p>
+                    
+                    <!-- Reply Button -->
+                    <div class="reply-button-container">
+                        <a href="mailto:your-email@example.com?subject=Re: A Little Something For You" class="reply-btn">Reply to Daniel 💌</a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -293,7 +324,7 @@
 
     <!-- Gallery section holding your 9 photos -->
     <div class="gallery-section" id="gallerySection">
-        <div class="gallery-title" contenteditable="true">✨ Our Favorite Moments ✨</div>
+        <div class="gallery-title">✨ Our Favorite Moments ✨</div>
         <div class="gallery-subtitle">Click on any photo frame to maximize it to full screen!</div>
         
         <div class="photo-grid" id="photoGrid">
@@ -347,7 +378,7 @@
                         <div class="zoom-overlay">🔍</div>
                         <img src="${photo.src}" alt="${photo.caption}">
                     </div>
-                    <span contenteditable="true" onclick="event.stopPropagation()">${photo.caption}</span>
+                    onclick="event.stopPropagation()">${photo.caption}</span>
                 </div>
             `;
             grid.innerHTML += polaroidHTML;
