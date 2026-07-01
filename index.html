@@ -66,11 +66,11 @@
             width: 100%;
             max-width: 600px;
             height: 380px;    
-            margin: 12rem auto 2rem auto; 
+            margin: 4rem auto 2rem auto; 
             position: relative;
             cursor: pointer;
             perspective: 1500px;
-            transition: margin-top 0.6s ease, transform 1.5s ease, opacity 1s ease;
+            transition: transform 1.5s ease, opacity 1s ease;
         }
 
         .envelope {
@@ -140,31 +140,35 @@
             animation: pulse 2s infinite;
         }
 
+        /* MODIFIED: Smooth container rollout style for the paper */
         .letter-content {
             position: absolute;
             top: 15px; left: 20px;
             width: calc(100% - 40px); 
-            height: auto;
-            max-height: 350px; /* Limits how far it expands downwards inside the envelope */
+            height: calc(100% - 30px);
             background-color: var(--paper-color);
             border-radius: 8px; 
             padding: 2rem;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.15), opacity 0.4s ease;
+            /* Transform-origin makes it roll/scale out organically from the envelope center */
+            transform-origin: center bottom;
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.27), opacity 0.5s ease, z-index 0s 0.8s;
             z-index: 2; 
             opacity: 0; 
-            overflow-y: auto; /* Adds a clean internal scrollbar if the letter text gets super long */
+            overflow: hidden;
         }
 
-        .envelope-container.open { margin-top: 30rem; }
+        /* FIXED ANIMATION: Brings the letter completely into the foreground safely above all flaps */
         .envelope-container.open .flap { transform: rotateX(180deg); z-index: 1; }
         .envelope-container.open .heart-seal { transform: translateY(-60px) rotate(-45deg) scale(0); opacity: 0; }
+        
         .envelope-container.open .letter-content {
-            transform: translateY(-380px); 
+            transform: translateY(-220px) scale(1.05); 
             opacity: 1; 
-            z-index: 10;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
-            max-height: 480px; /* Gives the letter more room to fully display text when opened */
+            z-index: 50; /* Higher than envelope flaps completely */
+            height: 520px;
+            overflow-y: auto;
+            box-shadow: 0 20px 45px rgba(0,0,0,0.25);
         }
 
         /* FOLDING & FLYING ANIMATION CLASSES */
@@ -252,13 +256,14 @@
         .gallery-section {
             width: 100%;
             max-width: 1000px;
-            margin-top: 4rem; /* Changed from 24rem to create a predictable flow spacing */
+            margin-top: 4rem; 
             opacity: 0;
             transform: translateY(30px);
             transition: opacity 1s ease, transform 1s ease;
+            display: none;
         }
 
-        .gallery-section.show { opacity: 1; transform: translateY(0); }
+        .gallery-section.show { display: block; opacity: 1; transform: translateY(0); }
         .gallery-title { text-align: center; font-family: 'Georgia', serif; margin-bottom: 0.5rem; font-size: 1.8rem; }
         .gallery-subtitle { text-align: center; font-size: 0.9rem; color: #777; margin-bottom: 3rem; font-style: italic; }
 
@@ -333,11 +338,9 @@
 
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.04); } 100% { transform: scale(1); } }
 
-        /* MOBILE ADJUSTMENTS */
+        /* Precise adjustments for phone layouts */
         @media (max-width: 640px) {
-            .envelope-container { max-width: 340px; height: 240px; margin-top: 8rem; }
-            /* This gives enough push room for the longer wrapped mobile text to clear the photos */
-            .envelope-container.open { margin-top: 32rem; }
+            .envelope-container { max-width: 340px; height: 240px; margin-top: 6rem; }
             .envelope::before { border-width: 0 0 130px 170px; }
             .envelope::after { border-width: 0 170px 130px 0; }
             .flap { border-width: 120px 170px 0 170px; }
@@ -345,13 +348,14 @@
             .heart-seal::before, .heart-seal::after { width: 34px; height: 34px; }
             .heart-seal::before { top: -17px; } .heart-seal::after { left: 17px; }
             
+            /* Rolls perfectly into standard display proportions over layout elements */
             .envelope-container.open .letter-content { 
-                transform: translateY(-280px); 
-                width: calc(100% - 20px); 
-                left: 10px; 
-                max-height: 420px;
+                transform: translateY(-130px) scale(1.02); 
+                width: calc(100% - 10px); 
+                left: 5px; 
+                height: 380px; 
+                padding: 1.2rem;
             }
-            .gallery-section { margin-top: 4rem; }
         }
     </style>
 </head>
@@ -446,8 +450,12 @@
         function switchToReplyMode() {
             document.getElementById('viewMode').style.display = 'none';
             document.getElementById('replyMode').style.display = 'block';
-            document.getElementById('gallerySection').style.display = 'none'; 
+            document.getElementById('gallerySection').classList.remove('show'); 
             document.getElementById('hint').textContent = "Write your reply letter 💝";
+            
+            // Adjust scroll safely for fields input focus
+            const contentContainer = document.querySelector('.envelope-container.open .letter-content');
+            if(contentContainer) contentContainer.scrollTop = 0;
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
@@ -461,7 +469,6 @@
             const body = document.getElementById('replyBody').value;
             const signature = document.getElementById('replyName').value;
 
-            // Simple validation to ensure she actually typed something
             if (!body.trim()) {
                 alert("Please write a small message before sealing the envelope! 💕");
                 return;
@@ -501,7 +508,6 @@
                     window.isReadingReply = true;
                     const decodedData = JSON.parse(decodeURIComponent(atob(letterCode)));
                     
-                    // Update layout seamlessly to hold her reply letter
                     document.querySelector('#viewMode h2').innerText = decodedData.h;
                     document.getElementById('replyButtonContainer').style.display = 'none';
                     document.getElementById('gallerySection').style.display = 'none';
@@ -540,7 +546,7 @@
             { src: "photo2.jpeg", caption: "Late Night Calls 💬" },
             { src: "photo3.jpeg", caption: "Blushing Moments 💕" },
             { src: "photo4.jpeg", caption: "Countless Laughs 📞" },
-            { src: "photo5.jpg", caption: "Out and About 🌿" },
+            { src: "photo5.jpg", center: "Out and About 🌿" },
             { src: "photo6.jpg", caption: "Photobooth Fun: Part 1 📸" },
             { src: "photo7.jpg", caption: "Photobooth Fun: Part 2 💜" },
             { src: "photo8.jpg", caption: "Holding Hands tight 🥰" },
@@ -554,12 +560,12 @@
             const randomRotation = (Math.random() * 8 - 4).toFixed(1); 
             
             const polaroidHTML = `
-                <div class="polaroid" style="--r: ${randomRotation}deg;" onclick="viewLargeImage('${photo.src}', '${photo.caption}')">
+                <div class="polaroid" style="--r: ${randomRotation}deg;" onclick="viewLargeImage('${photo.src}', '${photo.caption || ''}')">
                     <div class="img-container">
                         <div class="zoom-overlay">🔍</div>
-                        <img src="${photo.src}" alt="${photo.caption}">
+                        <img src="${photo.src}" alt="${photo.caption || ''}">
                     </div>
-                    <span>${photo.caption}</span>
+                    <span>${photo.caption || ''}</span>
                 </div>
             `;
             if(grid) grid.innerHTML += polaroidHTML;
