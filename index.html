@@ -447,15 +447,15 @@
         </div>
     </div>
 
-    <!-- Firebase System SDK Initialization Modules -->
+    <!-- Firebase Realtime Database SDK Imports -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getDatabase, ref, push, get, child } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        // Integrated with your custom project credentials
         const firebaseConfig = {
             apiKey: "AIzaSyBzSD3l72hVFQ9Qg-614ILwSKwo1V2SLH8",
             authDomain: "loveletter-392ea.firebaseapp.com",
+            databaseURL: "https://loveletter-392ea-default-rtdb.asia-southeast1.firebasedatabase.app",
             projectId: "loveletter-392ea",
             storageBucket: "loveletter-392ea.firebasestorage.app",
             messagingSenderId: "706200748111",
@@ -463,25 +463,24 @@
         };
 
         const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        const db = getDatabase(app);
 
-        // Publish handlers to global browser scope context safely
         window.saveLetterToFirebase = async function(letterData) {
             try {
-                await addDoc(collection(db, "replies"), {
+                const dbRef = ref(db, 'replies');
+                await push(dbRef, {
                     ...letterData,
-                    timestamp: new Date()
+                    timestamp: new Date().toISOString()
                 });
-                console.log("Letter securely recorded in Firestore Cloud!");
+                console.log("Letter securely saved!");
             } catch (e) {
-                console.error("Database connection fail execution error: ", e);
+                console.error("Database connection failed: ", e);
             }
         };
 
         window.loadSavedReplies = async function() {
             const passwordInput = document.getElementById('adminPassword').value;
             
-            // Password verification check: Change 'iloveyou' to your own secret key if you want
             if (passwordInput !== 'iloveyou') {
                 alert("Incorrect password! 🤫");
                 return;
@@ -491,18 +490,23 @@
             repliesContainer.innerHTML = 'Retrieving private messages...';
 
             try {
-                const q = query(collection(db, "replies"), orderBy("timestamp", "desc"));
-                const querySnapshot = await getDocs(q);
+                const dbRef = ref(db);
+                const snapshot = await get(child(dbRef, 'replies'));
                 repliesContainer.innerHTML = '';
 
-                if (querySnapshot.empty) {
+                if (!snapshot.exists()) {
                     repliesContainer.innerHTML = '<p style="text-align:center; color:#888;">No responses received in your inbox yet! ❤️</p>';
                     return;
                 }
 
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    const dateStr = data.timestamp ? data.timestamp.toDate().toLocaleString() : 'Unknown timeline date';
+                const rawData = snapshot.val();
+                const items = Object.keys(rawData).map(key => rawData[key]);
+                
+                // Sort by newest submission tracking
+                items.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+                items.forEach((data) => {
+                    const dateStr = data.timestamp ? new Date(data.timestamp).toLocaleString() : 'Unknown timeline date';
                     
                     const replyHTML = `
                         <div class="reply-item">
@@ -514,13 +518,13 @@
                     repliesContainer.innerHTML += replyHTML;
                 });
             } catch (e) {
-                repliesContainer.innerHTML = 'Error fetching documents context from cloud server maps.';
+                repliesContainer.innerHTML = 'Error fetching messages from server.';
                 console.error(e);
             }
         };
     </script>
 
-    <!-- UI Interaction Script Logic Layout loops -->
+    <!-- UI Core Mechanics Logic Loops -->
     <script>
         window.addEventListener('DOMContentLoaded', () => {
             generateHearts();
@@ -565,7 +569,6 @@
 
             const letterData = { h: header, t: title, b: body, s: signature };
             
-            // Submits live context directly up to Firestore cloud database tables
             if (typeof window.saveLetterToFirebase === 'function') {
                 window.saveLetterToFirebase(letterData);
             }
