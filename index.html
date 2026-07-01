@@ -70,7 +70,7 @@
             position: relative;
             cursor: pointer;
             perspective: 1500px;
-            transition: margin-top 0.6s ease;
+            transition: margin-top 0.6s ease, transform 1.5s ease, opacity 1s ease;
         }
 
         .envelope {
@@ -147,7 +147,7 @@
             background-color: var(--paper-color);
             border-radius: 8px; padding: 2rem;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.15), opacity 0.4s ease;
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.15), opacity 0.4s ease, height 0.8s ease;
             z-index: 2; opacity: 0; overflow: hidden; 
         }
 
@@ -160,6 +160,21 @@
             box-shadow: 0 25px 50px rgba(0,0,0,0.2);
         }
 
+        /* FOLDING & FLYING ANIMATION CLASSES */
+        .envelope-container.folding .letter-content {
+            transform: translateY(15px) scaleY(0.1);
+            height: 350px;
+            opacity: 0.8;
+        }
+        .envelope-container.folding .flap {
+            transform: rotateX(0deg);
+            z-index: 4;
+        }
+        .envelope-container.fly-away {
+            transform: translateY(-150vh) translateX(100vw) rotate(45deg) scale(0.2);
+            opacity: 0;
+        }
+
         .letter-scroll-wrapper { width: 100%; height: 100%; overflow-y: auto; padding-right: 0.5rem; }
         .letter-scroll-wrapper::-webkit-scrollbar { width: 6px; }
         .letter-scroll-wrapper::-webkit-scrollbar-thumb { background-color: var(--primary-pink); border-radius: 10px; }
@@ -170,17 +185,38 @@
         }
         .letter-text p { font-size: 1.05rem; line-height: 1.7; margin-bottom: 1.2rem; }
 
-        /* Reply Button Styling */
-        .reply-button-container {
+        /* Custom inputs for reply mode */
+        .reply-input, .reply-textarea {
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-bottom: 1px dashed var(--primary-pink);
+            font-family: inherit;
+            color: var(--text-color);
+            font-size: 1.05rem;
+            padding: 0.3rem 0;
+            margin-bottom: 1.2rem;
+            outline: none;
+            resize: none;
+        }
+        .reply-textarea {
+            height: 180px;
+            line-height: 1.7;
+        }
+
+        /* Button Styling */
+        .button-container {
             text-align: center;
             margin-top: 1.5rem;
             margin-bottom: 1rem;
         }
 
-        .reply-btn {
+        .action-btn {
             display: inline-block;
             background-color: var(--dark-pink);
             color: white;
+            border: none;
+            cursor: pointer;
             text-decoration: none;
             padding: 0.6rem 1.5rem;
             border-radius: 25px;
@@ -190,7 +226,7 @@
             transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
         }
 
-        .reply-btn:hover {
+        .action-btn:hover {
             background-color: #d9534f;
             transform: scale(1.05);
             box-shadow: 0 6px 15px rgba(236, 112, 99, 0.4);
@@ -307,15 +343,27 @@
         
         <div class="letter-content" onclick="event.stopPropagation()">
             <div class="letter-scroll-wrapper">
-                <div class="letter-text">
+                <!-- VIEW MODE (DANIEL'S LETTER) -->
+                <div class="letter-text" id="viewMode">
                     <h2>Hey My Baby LoveLove,</h2>
                     <p>I put together a small gallery of some of my absolute favorite moments with you. Looking back at these makes me realize how incredibly lucky I am to have you by my side. I pray that we can have more moments to be together.</p>
                     <p>From our casual video call catch-ups to the funny photobooth frames, every single memory puts a massive smile on my face. Well we have more video calls and screenshots hahahahaha!!! I can't wait to make so many more memories with you.</p>
                     <p style="text-align: right; font-style: italic; font-weight: bold; margin-top: 2rem;">Yours always, <br> Daniel</p>
                     
-                    <!-- Reply Button -->
-                    <div class="reply-button-container">
-                        <a href="mailto:your-email@example.com?subject=Re: A Little Something For You" class="reply-btn">Reply to Daniel 💌</a>
+                    <div class="button-container">
+                        <button onclick="openReplyTab()" class="action-btn">Reply to Daniel 💌</button>
+                    </div>
+                </div>
+
+                <!-- REPLY MODE (HER BLANK LETTER) -->
+                <div class="letter-text" id="replyMode" style="display: none;">
+                    <h2>Dear Daniel,</h2>
+                    <input type="text" class="reply-input" placeholder="Give your reply a sweet title... (Optional)">
+                    <textarea class="reply-textarea" placeholder="Write your letter here, love..."></textarea>
+                    <p style="text-align: right; font-style: italic; font-weight: bold;"><input type="text" class="reply-input" style="text-align: right; width: 150px;" placeholder="Your Name"></p>
+                    
+                    <div class="button-container">
+                        <button onclick="sendLetterAnimation()" class="action-btn">Send Letter ✨</button>
                     </div>
                 </div>
             </div>
@@ -341,6 +389,22 @@
     </div>
 
     <script>
+        // Check if this page instance is opened as a "Reply" tab
+        const urlParams = new URLSearchParams(window.location.search);
+        const isReplyMode = urlParams.get('mode') === 'reply';
+
+        window.addEventListener('DOMContentLoaded', () => {
+            generateHearts();
+            
+            // If it's reply mode, adjust views immediately
+            if (isReplyMode) {
+                document.getElementById('viewMode').style.display = 'none';
+                document.getElementById('replyMode').style.display = 'block';
+                document.getElementById('gallerySection').style.display = 'none'; // Hide gallery in reply window
+                document.getElementById('hint').textContent = "Write your reply below ✨";
+            }
+        });
+
         function openLetter(event) {
             const container = document.getElementById('envelopeContainer');
             const hint = document.getElementById('hint');
@@ -348,9 +412,41 @@
             
             if (!container.classList.contains('open')) {
                 container.classList.add('open');
-                hint.textContent = "Scroll down for our gallery ✨";
-                setTimeout(() => { gallery.classList.add('show'); }, 400);
+                if (!isReplyMode) {
+                    hint.textContent = "Scroll down for our gallery ✨";
+                    setTimeout(() => { gallery.classList.add('show'); }, 400);
+                } else {
+                    hint.textContent = "Your reply letter 💝";
+                }
             }
+        }
+
+        // Opens the exact same website in a new tab but passes a 'reply' rule
+        function openReplyTab() {
+            window.open(window.location.href + "?mode=reply", "_blank");
+        }
+
+        // Custom Folding and Flying away visual animation sequence
+        function sendLetterAnimation() {
+            const container = document.getElementById('envelopeContainer');
+            const hint = document.getElementById('hint');
+
+            hint.textContent = "Folding your response...";
+
+            // Phase 1: Fold letter paper back down inside the envelope
+            container.classList.add('folding');
+
+            // Phase 2: Seal envelope flap and launch it off the screen
+            setTimeout(() => {
+                hint.textContent = "Sending away! 🚀";
+                container.classList.remove('open');
+                container.classList.add('fly-away');
+            }, 1000);
+
+            // Phase 3: Final confirmation message
+            setTimeout(() => {
+                hint.textContent = "Sent successfully! You can close this tab now. 💕";
+            }, 2500);
         }
 
         // ARRAY WITH PHOTO 1 REMOVED
@@ -381,7 +477,7 @@
                     <span>${photo.caption}</span>
                 </div>
             `;
-            grid.innerHTML += polaroidHTML;
+            if(grid) grid.innerHTML += polaroidHTML;
         });
 
         function viewLargeImage(src, captionText) {
@@ -420,7 +516,6 @@
                 container.appendChild(heart);
             }
         }
-        window.addEventListener('DOMContentLoaded', generateHearts);
     </script>
 </body>
 </html>
