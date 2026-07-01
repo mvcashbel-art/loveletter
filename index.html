@@ -358,26 +358,28 @@
         <div class="heart-seal"></div>
          
         <div class="letter-content" onclick="event.stopPropagation()">
-            <!-- VIEW MODE (ASHBEL'S LETTER) -->
+            <!-- VIEW MODE (ASHBEL'S LETTER OR RECEIVED REPLY) -->
             <div class="letter-text" id="viewMode">
                 <h2>Hey My Baby LoveLove,</h2>
-                <p>I put together a small gallery of some of my absolute favorite moments with you. Looking back at these makes me realize how incredibly lucky I am to have you by my side. I pray that we can have more moments to be together.</p>
-                <p>From our casual video call catch-ups to the funny photobooth frames, every single memory puts a massive smile on my face. Well we have more video calls and screenshots hahahahaha!!! I can't wait to make so many more memories with you.</p>
-                <p style="text-align: right; font-style: italic; font-weight: bold; margin-top: 2rem;">Yours always, <br> Ashbel</p>
+                <div id="letterParagraphs">
+                    <p>I put together a small gallery of some of my absolute favorite moments with you. Looking back at these makes me realize how incredibly lucky I am to have you by my side. I pray that we can have more moments to be together.</p>
+                    <p>From our casual video call catch-ups to the funny photobooth frames, every single memory puts a massive smile on my face. Well we have more video calls and screenshots hahahahaha!!! I can't wait to make so many more memories with you.</p>
+                </div>
+                <p id="letterSignature" style="text-align: right; font-style: italic; font-weight: bold; margin-top: 2rem;">Yours always, <br> Ashbel</p>
                 
-                <div class="button-container">
+                <div class="button-container" id="replyButtonContainer">
                     <button onclick="switchToReplyMode()" class="action-btn">Reply to Ashbel 💌</button>
                 </div>
             </div>
 
             <!-- REPLY MODE (HER BLANK LETTER) -->
             <div class="letter-text" id="replyMode" style="display: none;">
-                <!-- This line is now an input field so she can click and edit the "Dear Ashbel," line freely! -->
                 <input type="text" class="reply-header-input" value="Dear Ashbel,">
-                
-                <input type="text" class="reply-input" placeholder="Give your reply a sweet title... (Optional)">
-                <textarea class="reply-textarea" placeholder="Write your letter here, love..."></textarea>
-                <p style="text-align: right; font-style: italic; font-weight: bold;"><input type="text" class="reply-input" style="text-align: right; width: 150px;" placeholder="Your Name"></p>
+                <input type="text" id="replyTitle" class="reply-input" placeholder="Give your reply a sweet title... (Optional)">
+                <textarea id="replyBody" class="reply-textarea" placeholder="Write your letter here, love..."></textarea>
+                <p style="text-align: right; font-style: italic; font-weight: bold;">
+                    <input type="text" id="replyName" class="reply-input" style="text-align: right; width: 150px;" placeholder="Your Name">
+                </p>
                 
                 <div class="button-container">
                     <button onclick="sendLetterAnimation()" class="action-btn">Send Letter ✨</button>
@@ -407,6 +409,7 @@
     <script>
         window.addEventListener('DOMContentLoaded', () => {
             generateHearts();
+            checkForReply();
         });
 
         function openLetter(event) {
@@ -416,43 +419,106 @@
             
             if (!container.classList.contains('open')) {
                 container.classList.add('open');
-                hint.textContent = "Scroll down for our gallery ✨";
-                setTimeout(() => { gallery.classList.add('show'); }, 400);
+                if (window.isReadingReply) {
+                    hint.textContent = "Reading her response 💕";
+                } else {
+                    hint.textContent = "Scroll down for our gallery ✨";
+                    setTimeout(() => { gallery.classList.add('show'); }, 400);
+                }
             }
         }
 
-        // Swaps views on the SAME page instantly
         function switchToReplyMode() {
             document.getElementById('viewMode').style.display = 'none';
             document.getElementById('replyMode').style.display = 'block';
-            document.getElementById('gallerySection').style.display = 'none'; // Hide gallery smoothly
+            document.getElementById('gallerySection').style.display = 'none'; 
             document.getElementById('hint').textContent = "Write your reply letter 💝";
-            
-            // Scroll user back smoothly to the top of the envelope
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // Custom Folding and Flying away visual animation sequence
+        // PACKAGES THE LETTER CONTENT INTO A LINK FOR YOU TO READ
         function sendLetterAnimation() {
             const container = document.getElementById('envelopeContainer');
             const hint = document.getElementById('hint');
 
-            hint.textContent = "Folding your response...";
+            const header = document.querySelector('.reply-header-input').value;
+            const title = document.getElementById('replyTitle').value;
+            const body = document.getElementById('replyBody').value;
+            const signature = document.getElementById('replyName').value;
 
-            // Phase 1: Fold letter paper back down inside the envelope
+            // Simple validation to ensure she actually typed something
+            if (!body.trim()) {
+                alert("Please write a small message before sealing the envelope! 💕");
+                return;
+            }
+
+            const letterData = { h: header, t: title, b: body, s: signature };
+            const encodedData = btoa(encodeURIComponent(JSON.stringify(letterData)));
+            const magicLink = window.location.origin + window.location.pathname + '?letter=' + encodedData;
+
+            hint.textContent = "Folding your response...";
             container.classList.add('folding');
 
-            // Phase 2: Seal envelope flap and launch it off the screen
             setTimeout(() => {
-                hint.textContent = "Sending away! 🚀";
+                hint.textContent = "Sealing it up! 💝";
                 container.classList.remove('open');
                 container.classList.add('fly-away');
             }, 1000);
 
-            // Phase 3: Final confirmation message
             setTimeout(() => {
-                hint.textContent = "Sent successfully! You can close this tab now. 💕";
+                hint.style.animation = "none"; 
+                hint.innerHTML = `
+                    <div style="background: white; padding: 1.5rem; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); max-width: 450px; margin: 0 auto; text-align: center;">
+                        <p style="font-size: 1.1rem; margin-bottom: 1.2rem; color: #4a232c; line-height: 1.5;">Your letter is beautifully sealed! Copy the magic link below and send it to Ashbel so he can read it: </p>
+                        <button onclick="navigator.clipboard.writeText('${magicLink}'); this.innerText='Copied! ✓'; this.style.background='#2ecc71';" class="action-btn" style="background: #ec7063; width: 100%; border-radius: 10px;">Copy My Letter Link 📋</button>
+                    </div>
+                `;
             }, 2500);
+        }
+
+        // CHECKS IF THE CURRENT URL IS AN APPLICATION RESPONSE LINK
+        function checkForReply() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const letterCode = urlParams.get('letter');
+
+            if (letterCode) {
+                try {
+                    window.isReadingReply = true;
+                    const decodedData = JSON.parse(decodeURIComponent(atob(letterCode)));
+                    
+                    // Update layout seamlessly to hold her reply letter
+                    document.querySelector('#viewMode h2').innerText = decodedData.h;
+                    document.getElementById('replyButtonContainer').style.display = 'none';
+                    document.getElementById('gallerySection').style.display = 'none';
+                    
+                    const paragraphsContainer = document.getElementById('letterParagraphs');
+                    paragraphsContainer.innerHTML = ''; 
+
+                    if (decodedData.t) {
+                        const titleP = document.createElement('p');
+                        titleP.style.fontWeight = 'bold';
+                        titleP.style.color = 'var(--dark-pink)';
+                        titleP.style.fontSize = '1.2rem';
+                        titleP.innerText = decodedData.t;
+                        paragraphsContainer.appendChild(titleP);
+                    }
+
+                    const messageParagraphs = decodedData.b.split('\n');
+                    messageParagraphs.forEach(text => {
+                        if (text.trim() !== "") {
+                            const p = document.createElement('p');
+                            p.innerText = text;
+                            paragraphsContainer.appendChild(p);
+                        }
+                    });
+
+                    document.getElementById('letterSignature').innerHTML = `Yours always, <br> ${decodedData.s || 'Your Love'}`;
+                    document.getElementById('hint').textContent = "You've got a reply from your love! Click to open 💌";
+
+                } catch (e) {
+                    console.error("Error structuralizing the received link package.", e);
+                }
+            }
         }
 
         const photoData = [
