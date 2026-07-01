@@ -187,6 +187,20 @@
         .letter-text p { font-size: 1.05rem; line-height: 1.7; margin-bottom: 1.2rem; }
 
         /* Custom inputs for reply mode */
+        .reply-header-input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-bottom: 1px dashed var(--primary-pink);
+            font-family: 'Georgia', serif;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #4a232c;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.2rem;
+            outline: none;
+        }
+        
         .reply-input, .reply-textarea {
             width: 100%;
             background: transparent;
@@ -358,7 +372,9 @@
 
             <!-- REPLY MODE (HER BLANK LETTER) -->
             <div class="letter-text" id="replyMode" style="display: none;">
-                <h2>Dear Ashbel,</h2>
+                <!-- This line is now an input field so she can click and edit the "Dear Ashbel," line freely! -->
+                <input type="text" class="reply-header-input" value="Dear Ashbel,">
+                
                 <input type="text" class="reply-input" placeholder="Give your reply a sweet title... (Optional)">
                 <textarea class="reply-textarea" placeholder="Write your letter here, love..."></textarea>
                 <p style="text-align: right; font-style: italic; font-weight: bold;"><input type="text" class="reply-input" style="text-align: right; width: 150px;" placeholder="Your Name"></p>
