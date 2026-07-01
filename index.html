@@ -143,27 +143,32 @@
         .letter-content {
             position: absolute;
             top: 15px; left: 20px;
-            width: calc(100% - 40px); height: calc(100% - 30px);
+            width: calc(100% - 40px); 
+            height: auto;
+            min-height: calc(100% - 30px);
             background-color: var(--paper-color);
-            border-radius: 8px; padding: 2rem;
+            border-radius: 8px; 
+            padding: 2rem;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.15), opacity 0.4s ease, height 0.8s ease;
-            z-index: 2; opacity: 0; overflow: hidden; 
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.15), opacity 0.4s ease;
+            z-index: 2; 
+            opacity: 0; 
+            overflow: visible; 
         }
 
-        .envelope-container.open { margin-top: 26rem; }
+        .envelope-container.open { margin-top: 28rem; }
         .envelope-container.open .flap { transform: rotateX(180deg); z-index: 1; }
         .envelope-container.open .heart-seal { transform: translateY(-60px) rotate(-45deg) scale(0); opacity: 0; }
         .envelope-container.open .letter-content {
-            transform: translateY(-240px); 
-            height: 480px; opacity: 1; z-index: 10;
+            transform: translateY(-380px); 
+            opacity: 1; 
+            z-index: 10;
             box-shadow: 0 25px 50px rgba(0,0,0,0.2);
         }
 
         /* FOLDING & FLYING ANIMATION CLASSES */
         .envelope-container.folding .letter-content {
             transform: translateY(15px) scaleY(0.1);
-            height: 350px;
             opacity: 0.8;
         }
         .envelope-container.folding .flap {
@@ -174,10 +179,6 @@
             transform: translateY(-150vh) translateX(100vw) rotate(45deg) scale(0.2);
             opacity: 0;
         }
-
-        .letter-scroll-wrapper { width: 100%; height: 100%; overflow-y: auto; padding-right: 0.5rem; }
-        .letter-scroll-wrapper::-webkit-scrollbar { width: 6px; }
-        .letter-scroll-wrapper::-webkit-scrollbar-thumb { background-color: var(--primary-pink); border-radius: 10px; }
 
         .letter-text h2 {
             font-family: 'Georgia', serif; margin-bottom: 1.2rem; font-size: 1.8rem;
@@ -200,7 +201,7 @@
             resize: none;
         }
         .reply-textarea {
-            height: 180px;
+            height: 150px;
             line-height: 1.7;
         }
 
@@ -236,7 +237,7 @@
         .gallery-section {
             width: 100%;
             max-width: 1000px;
-            margin-top: 8rem; 
+            margin-top: 24rem; 
             opacity: 0;
             transform: translateY(30px);
             transition: opacity 1s ease, transform 1s ease;
@@ -319,14 +320,15 @@
 
         @media (max-width: 640px) {
             .envelope-container { max-width: 340px; height: 240px; margin-top: 8rem; }
-            .envelope-container.open { margin-top: 18rem; }
+            .envelope-container.open { margin-top: 22rem; }
             .envelope::before { border-width: 0 0 130px 170px; }
             .envelope::after { border-width: 0 170px 130px 0; }
             .flap { border-width: 120px 170px 0 170px; }
             .heart-seal { top: 90px; left: calc(50% - 17px); width: 34px; height: 34px; }
             .heart-seal::before, .heart-seal::after { width: 34px; height: 34px; }
             .heart-seal::before { top: -17px; } .heart-seal::after { left: 17px; }
-            .envelope-container.open .letter-content { transform: translateY(-160px); height: 360px; width: calc(100% - 20px); left: 10px; }
+            .envelope-container.open .letter-content { transform: translateY(-260px); width: calc(100% - 20px); left: 10px; }
+            .gallery-section { margin-top: 16rem; }
         }
     </style>
 </head>
@@ -340,31 +342,29 @@
         <div class="flap"></div>
         <div class="envelope"></div>
         <div class="heart-seal"></div>
-        
+         
         <div class="letter-content" onclick="event.stopPropagation()">
-            <div class="letter-scroll-wrapper">
-                <!-- VIEW MODE (DANIEL'S LETTER) -->
-                <div class="letter-text" id="viewMode">
-                    <h2>Hey My Baby LoveLove,</h2>
-                    <p>I put together a small gallery of some of my absolute favorite moments with you. Looking back at these makes me realize how incredibly lucky I am to have you by my side. I pray that we can have more moments to be together.</p>
-                    <p>From our casual video call catch-ups to the funny photobooth frames, every single memory puts a massive smile on my face. Well we have more video calls and screenshots hahahahaha!!! I can't wait to make so many more memories with you.</p>
-                    <p style="text-align: right; font-style: italic; font-weight: bold; margin-top: 2rem;">Yours always, <br> Daniel</p>
-                    
-                    <div class="button-container">
-                        <button onclick="openReplyTab()" class="action-btn">Reply to Daniel 💌</button>
-                    </div>
+            <!-- VIEW MODE (DANIEL'S LETTER) -->
+            <div class="letter-text" id="viewMode">
+                <h2>Hey My Baby LoveLove,</h2>
+                <p>I put together a small gallery of some of my absolute favorite moments with you. Looking back at these makes me realize how incredibly lucky I am to have you by my side. I pray that we can have more moments to be together.</p>
+                <p>From our casual video call catch-ups to the funny photobooth frames, every single memory puts a massive smile on my face. Well we have more video calls and screenshots hahahahaha!!! I can't wait to make so many more memories with you.</p>
+                <p style="text-align: right; font-style: italic; font-weight: bold; margin-top: 2rem;">Yours always, <br> Daniel</p>
+                
+                <div class="button-container">
+                    <button onclick="switchToReplyMode()" class="action-btn">Reply to Ashbel 💌</button>
                 </div>
+            </div>
 
-                <!-- REPLY MODE (HER BLANK LETTER) -->
-                <div class="letter-text" id="replyMode" style="display: none;">
-                    <h2>Dear Daniel,</h2>
-                    <input type="text" class="reply-input" placeholder="Give your reply a sweet title... (Optional)">
-                    <textarea class="reply-textarea" placeholder="Write your letter here, love..."></textarea>
-                    <p style="text-align: right; font-style: italic; font-weight: bold;"><input type="text" class="reply-input" style="text-align: right; width: 150px;" placeholder="Your Name"></p>
-                    
-                    <div class="button-container">
-                        <button onclick="sendLetterAnimation()" class="action-btn">Send Letter ✨</button>
-                    </div>
+            <!-- REPLY MODE (HER BLANK LETTER) -->
+            <div class="letter-text" id="replyMode" style="display: none;">
+                <h2>Dear Daniel,</h2>
+                <input type="text" class="reply-input" placeholder="Give your reply a sweet title... (Optional)">
+                <textarea class="reply-textarea" placeholder="Write your letter here, love..."></textarea>
+                <p style="text-align: right; font-style: italic; font-weight: bold;"><input type="text" class="reply-input" style="text-align: right; width: 150px;" placeholder="Your Name"></p>
+                
+                <div class="button-container">
+                    <button onclick="sendLetterAnimation()" class="action-btn">Send Letter ✨</button>
                 </div>
             </div>
         </div>
@@ -389,20 +389,8 @@
     </div>
 
     <script>
-        // Check if this page instance is opened as a "Reply" tab
-        const urlParams = new URLSearchParams(window.location.search);
-        const isReplyMode = urlParams.get('mode') === 'reply';
-
         window.addEventListener('DOMContentLoaded', () => {
             generateHearts();
-            
-            // If it's reply mode, adjust views immediately
-            if (isReplyMode) {
-                document.getElementById('viewMode').style.display = 'none';
-                document.getElementById('replyMode').style.display = 'block';
-                document.getElementById('gallerySection').style.display = 'none'; // Hide gallery in reply window
-                document.getElementById('hint').textContent = "Write your reply below ✨";
-            }
         });
 
         function openLetter(event) {
@@ -412,18 +400,20 @@
             
             if (!container.classList.contains('open')) {
                 container.classList.add('open');
-                if (!isReplyMode) {
-                    hint.textContent = "Scroll down for our gallery ✨";
-                    setTimeout(() => { gallery.classList.add('show'); }, 400);
-                } else {
-                    hint.textContent = "Your reply letter 💝";
-                }
+                hint.textContent = "Scroll down for our gallery ✨";
+                setTimeout(() => { gallery.classList.add('show'); }, 400);
             }
         }
 
-        // Opens the exact same website in a new tab but passes a 'reply' rule
-        function openReplyTab() {
-            window.open(window.location.href + "?mode=reply", "_blank");
+        // Swaps views on the SAME page instantly
+        function switchToReplyMode() {
+            document.getElementById('viewMode').style.display = 'none';
+            document.getElementById('replyMode').style.display = 'block';
+            document.getElementById('gallerySection').style.display = 'none'; // Hide gallery smoothly
+            document.getElementById('hint').textContent = "Write your reply letter 💝";
+            
+            // Scroll user back smoothly to the top of the envelope
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         // Custom Folding and Flying away visual animation sequence
@@ -449,7 +439,6 @@
             }, 2500);
         }
 
-        // ARRAY WITH PHOTO 1 REMOVED
         const photoData = [
             { src: "photo2.jpeg", caption: "Late Night Calls 💬" },
             { src: "photo3.jpeg", caption: "Blushing Moments 💕" },
@@ -464,7 +453,6 @@
 
         const grid = document.getElementById('photoGrid');
 
-        // Dynamically loop and build the structural frame elements
         photoData.forEach((photo, index) => {
             const randomRotation = (Math.random() * 8 - 4).toFixed(1); 
             
