@@ -145,7 +145,7 @@
             top: 15px; left: 20px;
             width: calc(100% - 40px); 
             height: auto;
-            min-height: calc(100% - 30px);
+            max-height: 350px; /* Limits how far it expands downwards inside the envelope */
             background-color: var(--paper-color);
             border-radius: 8px; 
             padding: 2rem;
@@ -153,10 +153,10 @@
             transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.15), opacity 0.4s ease;
             z-index: 2; 
             opacity: 0; 
-            overflow: visible; 
+            overflow-y: auto; /* Adds a clean internal scrollbar if the letter text gets super long */
         }
 
-        .envelope-container.open { margin-top: 28rem; }
+        .envelope-container.open { margin-top: 30rem; }
         .envelope-container.open .flap { transform: rotateX(180deg); z-index: 1; }
         .envelope-container.open .heart-seal { transform: translateY(-60px) rotate(-45deg) scale(0); opacity: 0; }
         .envelope-container.open .letter-content {
@@ -164,6 +164,7 @@
             opacity: 1; 
             z-index: 10;
             box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+            max-height: 480px; /* Gives the letter more room to fully display text when opened */
         }
 
         /* FOLDING & FLYING ANIMATION CLASSES */
@@ -251,7 +252,7 @@
         .gallery-section {
             width: 100%;
             max-width: 1000px;
-            margin-top: 24rem; 
+            margin-top: 4rem; /* Changed from 24rem to create a predictable flow spacing */
             opacity: 0;
             transform: translateY(30px);
             transition: opacity 1s ease, transform 1s ease;
@@ -332,17 +333,25 @@
 
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.04); } 100% { transform: scale(1); } }
 
+        /* MOBILE ADJUSTMENTS */
         @media (max-width: 640px) {
             .envelope-container { max-width: 340px; height: 240px; margin-top: 8rem; }
-            .envelope-container.open { margin-top: 22rem; }
+            /* This gives enough push room for the longer wrapped mobile text to clear the photos */
+            .envelope-container.open { margin-top: 32rem; }
             .envelope::before { border-width: 0 0 130px 170px; }
             .envelope::after { border-width: 0 170px 130px 0; }
             .flap { border-width: 120px 170px 0 170px; }
             .heart-seal { top: 90px; left: calc(50% - 17px); width: 34px; height: 34px; }
             .heart-seal::before, .heart-seal::after { width: 34px; height: 34px; }
             .heart-seal::before { top: -17px; } .heart-seal::after { left: 17px; }
-            .envelope-container.open .letter-content { transform: translateY(-260px); width: calc(100% - 20px); left: 10px; }
-            .gallery-section { margin-top: 16rem; }
+            
+            .envelope-container.open .letter-content { 
+                transform: translateY(-280px); 
+                width: calc(100% - 20px); 
+                left: 10px; 
+                max-height: 420px;
+            }
+            .gallery-section { margin-top: 4rem; }
         }
     </style>
 </head>
