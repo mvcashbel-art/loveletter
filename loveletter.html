@@ -170,6 +170,29 @@
         }
         .letter-text p { font-size: 1.05rem; line-height: 1.7; margin-bottom: 1.2rem; }
 
+        /* Reply Button Design */
+        .reply-btn-container {
+            text-align: center;
+            margin: 2rem 0 1rem 0;
+        }
+        
+        .reply-button {
+            display: inline-block;
+            background-color: #e74c3c;
+            color: white;
+            text-decoration: none;
+            padding: 0.6rem 1.8rem;
+            font-weight: bold;
+            border-radius: 25px;
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .reply-button:hover {
+            background-color: var(--dark-pink);
+            transform: scale(1.05);
+        }
+
         /* Photo Gallery Section */
         .gallery-section {
             width: 100%;
@@ -282,10 +305,15 @@
         <div class="letter-content" onclick="event.stopPropagation()">
             <div class="letter-scroll-wrapper">
                 <div class="letter-text">
-                    <h2 contenteditable="true">Hey My Baby LoveLove,</h2>
-                    <p contenteditable="true">I put together a small gallery of some of my absolute favorite moments with you. Looking back at these makes me realize how incredibly lucky I am to have you by my side. I pray that we can have more moments to be together.</p>
-                    <p contenteditable="true">From our casual video call catch-ups to the funny photobooth frames, every single memory puts a massive smile on my face. Well we have more video calls and screenshots hahahahaha!!!. You can edit any part of this letter text right here if you want to leave a custom note!</p>
+                    <h2 contenteditable="true">Hey Love,</h2>
+                    <p contenteditable="true">I put together a small gallery of some of my absolute favorite moments with you. Looking back at these makes me realize how incredibly lucky I am to have you by my side.</p>
+                    <p contenteditable="true">From our casual video call catch-ups to the funny photobooth frames, every single memory puts a massive smile on my face. You can edit any part of this letter text right here if you want to leave a custom note!</p>
                     <p style="text-align: right; font-style: italic; font-weight: bold; margin-top: 2rem;" contenteditable="true">Yours always, <br> Daniel</p>
+                    
+                    <!-- New Interactive Reply Button Frame -->
+                    <div class="reply-btn-container">
+                        <a href="mailto:your-email@example.com?subject=I%20loved%20your%20letter!%20❤️" class="reply-button">Click to Send a Reply 💌</a>
+                    </div>
                 </div>
             </div>
         </div>
