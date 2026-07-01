@@ -140,7 +140,7 @@
             animation: pulse 2s infinite;
         }
 
-        /* MODIFIED: Smooth container rollout style for the paper */
+        /* Smooth container rollout style for the paper */
         .letter-content {
             position: absolute;
             top: 15px; left: 20px;
@@ -150,7 +150,6 @@
             border-radius: 8px; 
             padding: 2rem;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            /* Transform-origin makes it roll/scale out organically from the envelope center */
             transform-origin: center bottom;
             transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.27), opacity 0.5s ease, z-index 0s 0.8s;
             z-index: 2; 
@@ -158,14 +157,14 @@
             overflow: hidden;
         }
 
-        /* FIXED ANIMATION: Brings the letter completely into the foreground safely above all flaps */
+        /* Brings the letter completely into the foreground safely above all flaps */
         .envelope-container.open .flap { transform: rotateX(180deg); z-index: 1; }
         .envelope-container.open .heart-seal { transform: translateY(-60px) rotate(-45deg) scale(0); opacity: 0; }
         
         .envelope-container.open .letter-content {
             transform: translateY(-220px) scale(1.05); 
             opacity: 1; 
-            z-index: 50; /* Higher than envelope flaps completely */
+            z-index: 50; 
             height: 520px;
             overflow-y: auto;
             box-shadow: 0 20px 45px rgba(0,0,0,0.25);
@@ -336,9 +335,25 @@
         .lightbox-img { max-width: 100%; max-height: 70vh; object-fit: contain; }
         .lightbox-caption { text-align: center; font-family: 'Courier New', Courier, monospace; font-size: 1.1rem; margin-top: 1.2rem; font-weight: bold; }
 
+        /* Secret Dashboard Section for checking replies */
+        .dashboard-section {
+            width: 100%;
+            max-width: 600px;
+            margin-top: 5rem;
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        .dashboard-section h3 { margin-bottom: 1rem; font-family: 'Georgia', serif; }
+        .replies-list { text-align: left; margin-top: 1.5rem; }
+        .reply-item { background: #fffcf7; border: 1px dashed var(--primary-pink); padding: 1rem; margin-bottom: 1rem; border-radius: 8px; }
+        .reply-item h4 { color: #4a232c; margin-bottom: 0.3rem; }
+        .reply-item .time { font-size: 0.8rem; color: #888; margin-bottom: 0.5rem; }
+
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.04); } 100% { transform: scale(1); } }
 
-        /* Precise adjustments for phone layouts */
         @media (max-width: 640px) {
             .envelope-container { max-width: 340px; height: 240px; margin-top: 6rem; }
             .envelope::before { border-width: 0 0 130px 170px; }
@@ -348,7 +363,6 @@
             .heart-seal::before, .heart-seal::after { width: 34px; height: 34px; }
             .heart-seal::before { top: -17px; } .heart-seal::after { left: 17px; }
             
-            /* Rolls perfectly into standard display proportions over layout elements */
             .envelope-container.open .letter-content { 
                 transform: translateY(-130px) scale(1.02); 
                 width: calc(100% - 10px); 
@@ -371,7 +385,7 @@
         <div class="heart-seal"></div>
          
         <div class="letter-content" onclick="event.stopPropagation()">
-            <!-- VIEW MODE (ASHBEL'S LETTER OR RECEIVED REPLY) -->
+            <!-- VIEW MODE -->
             <div class="letter-text" id="viewMode">
                 <h2>Hey My Baby LoveLove,</h2>
                 <div id="letterParagraphs">
@@ -391,7 +405,7 @@
                 </div>
             </div>
 
-            <!-- REPLY MODE (HER BLANK LETTER) -->
+            <!-- REPLY MODE -->
             <div class="letter-text" id="replyMode" style="display: none;">
                 <input type="text" class="reply-header-input" value="Dear Ashbel,">
                 <input type="text" id="replyTitle" class="reply-input" placeholder="Give your reply a sweet title... (Optional)">
@@ -407,14 +421,22 @@
         </div>
     </div>
 
-    <!-- Gallery section holding your 9 photos -->
+    <!-- Gallery section -->
     <div class="gallery-section" id="gallerySection">
         <div class="gallery-title">✨ Our Favorite Moments ✨</div>
         <div class="gallery-subtitle">Click on any photo frame to maximize it to full screen!</div>
         
-        <div class="photo-grid" id="photoGrid">
-            <!-- JavaScript dynamically renders your photos here -->
-        </div>
+        <div class="photo-grid" id="photoGrid"></div>
+    </div>
+
+    <!-- Admin Dashboard Section for Ashbel -->
+    <div class="dashboard-section">
+        <h3>Ashbel's Secret Inbox 🔒</h3>
+        <p style="font-size:0.9rem; margin-bottom: 1rem; color: #666;">Enter password to view saved replies from your love.</p>
+        <input type="password" id="adminPassword" placeholder="Enter password..." class="reply-input" style="width:200px; text-align:center; margin-bottom: 10px;">
+        <br>
+        <button onclick="loadSavedReplies()" class="action-btn" style="padding: 0.4rem 1rem; font-size:0.9rem;">View Replies</button>
+        <div class="replies-list" id="repliesContainer"></div>
     </div>
 
     <!-- Lightbox Zoom Modal -->
@@ -425,10 +447,83 @@
         </div>
     </div>
 
+    <!-- Firebase System SDK Initialization Modules -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Integrated with your custom project credentials
+        const firebaseConfig = {
+            apiKey: "AIzaSyBzSD3l72hVFQ9Qg-614ILwSKwo1V2SLH8",
+            authDomain: "loveletter-392ea.firebaseapp.com",
+            projectId: "loveletter-392ea",
+            storageBucket: "loveletter-392ea.firebasestorage.app",
+            messagingSenderId: "706200748111",
+            appId: "1:706200748111:web:eed3b76f7f503f4d49aa3a"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Publish handlers to global browser scope context safely
+        window.saveLetterToFirebase = async function(letterData) {
+            try {
+                await addDoc(collection(db, "replies"), {
+                    ...letterData,
+                    timestamp: new Date()
+                });
+                console.log("Letter securely recorded in Firestore Cloud!");
+            } catch (e) {
+                console.error("Database connection fail execution error: ", e);
+            }
+        };
+
+        window.loadSavedReplies = async function() {
+            const passwordInput = document.getElementById('adminPassword').value;
+            
+            // Password verification check: Change 'iloveyou' to your own secret key if you want
+            if (passwordInput !== 'iloveyou') {
+                alert("Incorrect password! 🤫");
+                return;
+            }
+
+            const repliesContainer = document.getElementById('repliesContainer');
+            repliesContainer.innerHTML = 'Retrieving private messages...';
+
+            try {
+                const q = query(collection(db, "replies"), orderBy("timestamp", "desc"));
+                const querySnapshot = await getDocs(q);
+                repliesContainer.innerHTML = '';
+
+                if (querySnapshot.empty) {
+                    repliesContainer.innerHTML = '<p style="text-align:center; color:#888;">No responses received in your inbox yet! ❤️</p>';
+                    return;
+                }
+
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const dateStr = data.timestamp ? data.timestamp.toDate().toLocaleString() : 'Unknown timeline date';
+                    
+                    const replyHTML = `
+                        <div class="reply-item">
+                            <h4>${data.t || 'Untitled Note'}</h4>
+                            <div class="time">From: ${data.s || 'Your Love'} | Received: ${dateStr}</div>
+                            <p style="white-space: pre-wrap; font-size:0.95rem; line-height:1.5;">${data.b}</p>
+                        </div>
+                    `;
+                    repliesContainer.innerHTML += replyHTML;
+                });
+            } catch (e) {
+                repliesContainer.innerHTML = 'Error fetching documents context from cloud server maps.';
+                console.error(e);
+            }
+        };
+    </script>
+
+    <!-- UI Interaction Script Logic Layout loops -->
     <script>
         window.addEventListener('DOMContentLoaded', () => {
             generateHearts();
-            checkForReply();
         });
 
         function openLetter(event) {
@@ -438,12 +533,8 @@
             
             if (!container.classList.contains('open')) {
                 container.classList.add('open');
-                if (window.isReadingReply) {
-                    hint.textContent = "Reading her response 💕";
-                } else {
-                    hint.textContent = "Scroll down for our gallery ✨";
-                    setTimeout(() => { gallery.classList.add('show'); }, 400);
-                }
+                hint.textContent = "Scroll down for our gallery ✨";
+                setTimeout(() => { gallery.classList.add('show'); }, 400);
             }
         }
 
@@ -453,13 +544,11 @@
             document.getElementById('gallerySection').classList.remove('show'); 
             document.getElementById('hint').textContent = "Write your reply letter 💝";
             
-            // Adjust scroll safely for fields input focus
             const contentContainer = document.querySelector('.envelope-container.open .letter-content');
             if(contentContainer) contentContainer.scrollTop = 0;
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // PACKAGES THE LETTER CONTENT INTO A LINK FOR YOU TO READ
         function sendLetterAnimation() {
             const container = document.getElementById('envelopeContainer');
             const hint = document.getElementById('hint');
@@ -475,8 +564,11 @@
             }
 
             const letterData = { h: header, t: title, b: body, s: signature };
-            const encodedData = btoa(encodeURIComponent(JSON.stringify(letterData)));
-            const magicLink = window.location.origin + window.location.pathname + '?letter=' + encodedData;
+            
+            // Submits live context directly up to Firestore cloud database tables
+            if (typeof window.saveLetterToFirebase === 'function') {
+                window.saveLetterToFirebase(letterData);
+            }
 
             hint.textContent = "Folding your response...";
             container.classList.add('folding');
@@ -491,62 +583,18 @@
                 hint.style.animation = "none"; 
                 hint.innerHTML = `
                     <div style="background: white; padding: 1.5rem; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); max-width: 450px; margin: 0 auto; text-align: center;">
-                        <p style="font-size: 1.1rem; margin-bottom: 1.2rem; color: #4a232c; line-height: 1.5;">Your letter is beautifully sealed! Copy the magic link below and send it to Ashbel so he can read it: </p>
-                        <button onclick="navigator.clipboard.writeText('${magicLink}'); this.innerText='Copied! ✓'; this.style.background='#2ecc71';" class="action-btn" style="background: #ec7063; width: 100%; border-radius: 10px;">Copy My Letter Link 📋</button>
+                        <p style="font-size: 1.1rem; margin-bottom: 0.5rem; color: #4a232c; font-weight: bold;">Sent Successfully! ✨</p>
+                        <p style="font-size: 0.95rem; color: #666; line-height: 1.5;">Your reply has been saved to Ashbel's database cloud. He can view it inside his secret inbox block below anytime!</p>
                     </div>
                 `;
             }, 2500);
-        }
-
-        // CHECKS IF THE CURRENT URL IS AN APPLICATION RESPONSE LINK
-        function checkForReply() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const letterCode = urlParams.get('letter');
-
-            if (letterCode) {
-                try {
-                    window.isReadingReply = true;
-                    const decodedData = JSON.parse(decodeURIComponent(atob(letterCode)));
-                    
-                    document.querySelector('#viewMode h2').innerText = decodedData.h;
-                    document.getElementById('replyButtonContainer').style.display = 'none';
-                    document.getElementById('gallerySection').style.display = 'none';
-                    
-                    const paragraphsContainer = document.getElementById('letterParagraphs');
-                    paragraphsContainer.innerHTML = ''; 
-
-                    if (decodedData.t) {
-                        const titleP = document.createElement('p');
-                        titleP.style.fontWeight = 'bold';
-                        titleP.style.color = 'var(--dark-pink)';
-                        titleP.style.fontSize = '1.2rem';
-                        titleP.innerText = decodedData.t;
-                        paragraphsContainer.appendChild(titleP);
-                    }
-
-                    const messageParagraphs = decodedData.b.split('\n');
-                    messageParagraphs.forEach(text => {
-                        if (text.trim() !== "") {
-                            const p = document.createElement('p');
-                            p.innerText = text;
-                            paragraphsContainer.appendChild(p);
-                        }
-                    });
-
-                    document.getElementById('letterSignature').innerHTML = `Yours always, <br> ${decodedData.s || 'Your Love'}`;
-                    document.getElementById('hint').textContent = "You've got a reply from your love! Click to open 💌";
-
-                } catch (e) {
-                    console.error("Error structuralizing the received link package.", e);
-                }
-            }
         }
 
         const photoData = [
             { src: "photo2.jpeg", caption: "Late Night Calls 💬" },
             { src: "photo3.jpeg", caption: "Blushing Moments 💕" },
             { src: "photo4.jpeg", caption: "Countless Laughs 📞" },
-            { src: "photo5.jpg", center: "Out and About 🌿" },
+            { src: "photo5.jpg", caption: "Out and About 🌿" },
             { src: "photo6.jpg", caption: "Photobooth Fun: Part 1 📸" },
             { src: "photo7.jpg", caption: "Photobooth Fun: Part 2 💜" },
             { src: "photo8.jpg", caption: "Holding Hands tight 🥰" },
